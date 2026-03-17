@@ -1,12 +1,14 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
+
+const redis = Redis.fromEnv();
 
 export async function GET() {
   try {
-    const downloads = await kv.get<number>("downloads_count") || 0;
+    const downloads = await redis.get<number>("downloads_count") || 0;
     return NextResponse.json({ downloads });
   } catch (error) {
-    console.error("KV Error:", error);
+    console.error("Redis Error:", error);
     return NextResponse.json({ downloads: 0 });
   }
 }

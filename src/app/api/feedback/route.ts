@@ -1,5 +1,7 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
+
+const redis = Redis.fromEnv();
 
 export async function POST(req: Request) {
   try {
@@ -11,12 +13,12 @@ export async function POST(req: Request) {
     }
 
     const feedbackId = `feedback:${Date.now()}`;
-    await kv.hset(feedbackId, { name, email, message, timestamp: new Date().toISOString() });
-    await kv.lpush("feedback_list", feedbackId);
+    await redis.hset(feedbackId, { name, email, message, timestamp: new Date().toISOString() });
+    await redis.lpush("feedback_list", feedbackId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("KV Error:", error);
+    console.error("Redis Error:", error);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }
